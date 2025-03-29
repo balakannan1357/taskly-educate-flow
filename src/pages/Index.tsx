@@ -13,6 +13,7 @@ import { useDailyTaskStats } from '@/hooks/useDailyTaskStats';
 const Index = () => {
   const { getTasksByDate, tasks } = useTaskContext();
   const [selectedDate, setSelectedDate] = useState(new Date());
+  // Explicitly set weekStartsOn to 0 (Sunday)
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 0 }));
   const [taskSchedule, setTaskSchedule] = useState([]);
   const containerRef = useRef(null);
