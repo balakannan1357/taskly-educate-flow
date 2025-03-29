@@ -12,6 +12,7 @@ export interface Task {
   completed: boolean;
   dueDate: Date;
   createdAt: Date;
+  estimatedTime?: number; // in minutes
 }
 
 export interface User {

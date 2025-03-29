@@ -1,18 +1,49 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { format, addDays, addWeeks, subWeeks, startOfWeek, isToday, isSameDay, parseISO } from 'date-fns';
 import TaskCard from '@/components/task/TaskCard';
 import { useTaskContext } from '@/context/TaskContext';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, CheckCircle2, ListChecks, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarDays, CheckCircle2, ListChecks, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchUserDetails, generateTaskSchedule } from '@/services/api';
+import { TaskTimeline } from '@/components/task/TaskTimeline';
+import { useDailyTaskStats } from '@/hooks/useDailyTaskStats';
 
 const Index = () => {
   const { getTasksByDate, tasks } = useTaskContext();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 0 }));
   const [taskSchedule, setTaskSchedule] = useState([]);
+  const containerRef = useRef(null);
+  const { completedTasksCount, totalTasksCount } = useDailyTaskStats(selectedDate);
+
+  // Touch swipe handling for day navigation
+  const touchStartX = useRef(null);
+  
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX;
+    
+    // Swipe threshold of 50px
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        // Swipe left - next day
+        setSelectedDate(prev => addDays(prev, 1));
+      } else {
+        // Swipe right - previous day
+        setSelectedDate(prev => addDays(prev, -1));
+      }
+    }
+    
+    touchStartX.current = null;
+  };
 
   // Fetch user details to get available study time and tuition schedule
   const { data: userData } = useQuery({
@@ -31,6 +62,16 @@ const Index = () => {
       setTaskSchedule(schedule);
     }
   }, [userData, tasks]);
+
+  // Navigate to previous day
+  const goToPreviousDay = () => {
+    setSelectedDate(prevDate => addDays(prevDate, -1));
+  };
+
+  // Navigate to next day
+  const goToNextDay = () => {
+    setSelectedDate(prevDate => addDays(prevDate, 1));
+  };
 
   // Navigate to previous week
   const goToPreviousWeek = () => {
@@ -53,15 +94,19 @@ const Index = () => {
   });
 
   const tasksForSelectedDate = getTasksByDate(selectedDate);
-  const completedTasksCount = tasks.filter(task => task.completed).length;
-
+  
   // Find scheduled tasks for the selected day
   const scheduledTasksForToday = taskSchedule.filter(
     item => item.day === format(selectedDate, 'EEEE')
   );
 
   return (
-    <div className="taskly-container page-transition">
+    <div 
+      className="taskly-container page-transition"
+      ref={containerRef}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <header className="mb-6">
         <h1 className="text-2xl font-bold">TaskApp</h1>
         <p className="text-gray-600">Organize your student life</p>
@@ -113,41 +158,40 @@ const Index = () => {
       </div>
 
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-semibold">
-          {isToday(selectedDate) ? 'Today' : format(selectedDate, 'MMMM d')}
-        </h2>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={goToPreviousDay}
+            className="p-1 h-8 w-8"
+          >
+            <ChevronLeft size={16} />
+          </Button>
+          <h2 className="text-xl font-semibold">
+            {isToday(selectedDate) ? 'Today' : format(selectedDate, 'MMMM d')}
+          </h2>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={goToNextDay}
+            className="p-1 h-8 w-8"
+          >
+            <ChevronRight size={16} />
+          </Button>
+        </div>
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <CheckCircle2 size={18} />
-          <span>{completedTasksCount} completed</span>
+          <span>{completedTasksCount} of {totalTasksCount}</span>
         </div>
       </div>
 
-      {scheduledTasksForToday.length > 0 && (
-        <div className="mb-4">
-          <h3 className="text-md font-medium mb-2">Scheduled Study Time</h3>
-          <div className="bg-white rounded-lg p-3 shadow-sm">
-            {scheduledTasksForToday.map((scheduled, idx) => (
-              <div key={idx} className="flex justify-between items-center p-2 border-b last:border-0">
-                <div>
-                  <p className="font-medium">{scheduled.taskName}</p>
-                  <p className="text-sm text-gray-600">{scheduled.subject}</p>
-                </div>
-                <div className="text-right">
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    scheduled.priority === 'High' ? 'bg-red-200 text-red-900' :
-                    scheduled.priority === 'Medium' ? 'bg-yellow-200 text-yellow-900' :
-                    'bg-green-200 text-green-900'
-                  }`}>
-                    {scheduled.hoursAllocated}h
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Daily Timeline */}
+      <TaskTimeline 
+        scheduledTasks={scheduledTasksForToday} 
+        selectedDate={selectedDate}
+      />
 
-      <div className="space-y-4">
+      <div className="space-y-4 mt-4">
         {tasksForSelectedDate.length > 0 ? (
           tasksForSelectedDate.map((task) => (
             <TaskCard key={task.id} task={task} />

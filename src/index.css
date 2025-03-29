@@ -136,6 +136,22 @@
   @apply bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-4 shadow-md transition-all duration-200 hover:shadow-lg;
 }
 
+/* Confetti animations */
+@keyframes fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.animate-confetti {
+  animation: fall 3s linear forwards;
+}
+
 /* Mobile Optimizations */
 @supports (padding: max(0px)) {
   .safe-top {
