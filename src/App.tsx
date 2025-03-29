@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import UserPage from "./pages/UserPage";
 import AddTaskPage from "./pages/AddTaskPage";
+import EditTaskPage from "./pages/EditTaskPage";
 import SettingsPage from "./pages/SettingsPage";
 import BottomNavigation from "./components/layout/BottomNavigation";
 import { TaskProvider } from "./context/TaskContext";
@@ -26,6 +27,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/user" element={<UserPage />} />
               <Route path="/add-task" element={<AddTaskPage />} />
+              <Route path="/edit-task/:id" element={<EditTaskPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

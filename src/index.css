@@ -36,6 +36,10 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.75rem;
+    
+    --priority-high: 0 84.2% 60.2%;
+    --priority-medium: 35 100% 70%;
+    --priority-low: 142 76% 40%;
   }
 
   .dark {
@@ -78,6 +82,25 @@
     @apply bg-background text-foreground font-sans antialiased;
     background-image: linear-gradient(135deg, #D3E4FD 0%, #A0E4E1 100%);
     min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  /* Remove blue highlight on touch */
+  input,
+  textarea,
+  button,
+  select,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Better scrolling */
+  html {
+    scroll-behavior: smooth;
   }
 }
 
@@ -94,21 +117,77 @@
 }
 
 .priority-high {
-  @apply bg-priority-high text-white;
+  @apply bg-red-500 text-white;
 }
 
 .priority-medium {
-  @apply bg-priority-medium text-black;
+  @apply bg-yellow-400 text-black;
 }
 
 .priority-low {
-  @apply bg-priority-low text-white;
+  @apply bg-green-600 text-white;
 }
 
 .bottom-nav-container {
-  @apply fixed bottom-0 left-0 right-0 bg-white bg-opacity-95 backdrop-blur-lg border-t border-gray-200 shadow-lg z-50;
+  @apply fixed bottom-0 left-0 right-0 bg-white bg-opacity-95 backdrop-blur-lg border-t border-gray-200 shadow-lg z-50 safe-bottom;
 }
 
 .task-card {
   @apply bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-4 shadow-md transition-all duration-200 hover:shadow-lg;
+}
+
+/* Mobile Optimizations */
+@supports (padding: max(0px)) {
+  .safe-top {
+    padding-top: max(env(safe-area-inset-top), 16px);
+  }
+  
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
+  
+  .taskly-container {
+    padding-top: max(env(safe-area-inset-top), 16px);
+    padding-bottom: calc(max(env(safe-area-inset-bottom), 0px) + 70px);
+  }
+}
+
+/* PWA specific animation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-in;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* Make app feel more native */
+@media (max-width: 768px) {
+  * {
+    user-select: none;
+  }
+  
+  input, textarea {
+    user-select: text;
+  }
 }

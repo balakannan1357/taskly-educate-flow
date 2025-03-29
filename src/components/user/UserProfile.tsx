@@ -1,17 +1,35 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User } from '@/types';
-import { Camera, Upload } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import { toast } from 'sonner';
+import { fetchUserDetails } from '@/services/api';
+import { useQuery } from '@tanstack/react-query';
 
 const UserProfile: React.FC = () => {
   const [user, setUser] = useState<User>({
     name: '',
     email: '',
     profilePicture: '',
+  });
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch user details from API
+  const { data: apiUserData, isLoading: apiLoading } = useQuery({
+    queryKey: ['userData'],
+    queryFn: fetchUserDetails,
+    onSuccess: (data) => {
+      // Only update if we don't have local data yet
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) {
+        setUser(data);
+      }
+    }
   });
 
   useEffect(() => {
@@ -23,6 +41,7 @@ const UserProfile: React.FC = () => {
         console.error('Error parsing user from localStorage:', error);
       }
     }
+    setIsLoading(false);
   }, []);
 
   const handleSave = () => {
@@ -57,6 +76,10 @@ const UserProfile: React.FC = () => {
     };
     reader.readAsDataURL(file);
   };
+
+  if (isLoading || apiLoading) {
+    return <div className="text-center py-10">Loading user profile...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -105,6 +128,40 @@ const UserProfile: React.FC = () => {
             placeholder="Enter your email"
             value={user.email}
             onChange={(e) => setUser({ ...user, email: e.target.value })}
+            className="bg-white bg-opacity-80"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="dateOfBirth">Date of Birth</Label>
+          <Input
+            id="dateOfBirth"
+            type="date"
+            value={user.dateOfBirth || ''}
+            onChange={(e) => setUser({ ...user, dateOfBirth: e.target.value })}
+            className="bg-white bg-opacity-80"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="school">School</Label>
+          <Input
+            id="school"
+            placeholder="Enter your school name"
+            value={user.school || ''}
+            onChange={(e) => setUser({ ...user, school: e.target.value })}
+            className="bg-white bg-opacity-80"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="studyTime">Available Study Time (hours/week)</Label>
+          <Input
+            id="studyTime"
+            type="number"
+            placeholder="20"
+            value={user.availableStudyTime || ''}
+            onChange={(e) => setUser({ ...user, availableStudyTime: Number(e.target.value) })}
             className="bg-white bg-opacity-80"
           />
         </div>

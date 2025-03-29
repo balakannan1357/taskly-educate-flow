@@ -18,4 +18,22 @@ export interface User {
   name: string;
   email: string;
   profilePicture?: string;
+  dateOfBirth?: string;
+  school?: string;
+  availableStudyTime?: number;
+  tuitionSchedule?: {
+    day: string;
+    startTime: string;
+    endTime: string;
+    subject: string;
+  }[];
+}
+
+export interface TaskSchedule {
+  taskId: string;
+  day: string;
+  hoursAllocated: number;
+  taskName: string;
+  subject: string;
+  priority: Priority;
 }
