@@ -23,14 +23,27 @@ const UserProfile: React.FC = () => {
   const { data: apiUserData, isLoading: apiLoading } = useQuery({
     queryKey: ['userData'],
     queryFn: fetchUserDetails,
-    onSuccess: (data) => {
-      // Only update if we don't have local data yet
-      const storedUser = localStorage.getItem('user');
-      if (!storedUser) {
-        setUser(data);
+    // In React Query v5, callbacks are moved to the meta object
+    meta: {
+      onSuccess: (data: any) => {
+        // Only update if we don't have local data yet
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+          setUser(data);
+        }
       }
     }
   });
+
+  // Instead, we handle the success case with useEffect
+  useEffect(() => {
+    if (apiUserData) {
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) {
+        setUser(apiUserData);
+      }
+    }
+  }, [apiUserData]);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
