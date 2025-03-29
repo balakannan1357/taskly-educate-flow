@@ -16,7 +16,7 @@ const Index = () => {
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 0 }));
   const [taskSchedule, setTaskSchedule] = useState([]);
   const containerRef = useRef(null);
-  const { completedTasksCount, totalTasksCount } = useDailyTaskStats(selectedDate);
+  const { completedTasksCount, totalTasksCount, tasksForSelectedDate } = useDailyTaskStats(selectedDate);
 
   // Touch swipe handling for day navigation
   const touchStartX = useRef(null);
@@ -92,8 +92,6 @@ const Index = () => {
       dayNumber: format(day, 'd'),
     };
   });
-
-  const tasksForSelectedDate = getTasksByDate(selectedDate);
   
   // Find scheduled tasks for the selected day
   const scheduledTasksForToday = taskSchedule.filter(
@@ -185,7 +183,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Daily Timeline */}
+      {/* Daily Timeline - show for every day, regardless of scheduled tasks */}
       <TaskTimeline 
         scheduledTasks={scheduledTasksForToday} 
         selectedDate={selectedDate}
