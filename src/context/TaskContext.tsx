@@ -1,7 +1,6 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Task, Priority, TaskType } from '../types';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 interface TaskContextType {
   tasks: Task[];

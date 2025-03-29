@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { BellRing, Moon, LogOut, HelpCircle, Info } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 const SettingsPage = () => {
   const [settings, setSettings] = useState({
